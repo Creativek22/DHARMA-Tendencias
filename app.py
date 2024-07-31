@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from datetime import datetime
 import yfinance as yf
+import base64
 
 # Configuración del tema en config.toml o por defecto
 st.set_page_config(page_title="Análisis de Mercados de Metales", layout="centered")
@@ -39,13 +40,13 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Cargar el logo de la empresa
-logo = Image.open("logo.png")
+# Cargar el logo de la empresa en formato webp
+with open("logo.webp", "rb") as image_file:
+    logo_bytes = image_file.read()
+    logo_b64 = base64.b64encode(logo_bytes).decode("utf-8")
 
 # Mostrar el logo centrado en la parte superior
-st.markdown('<div class="logo-container">', unsafe_allow_html=True)
-st.image(logo, width=300)  # Ajustar el ancho según sea necesario
-st.markdown('</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="logo-container"><img src="data:image/webp;base64,{logo_b64}" width="300"></div>', unsafe_allow_html=True)
 
 # Título de la aplicación
 st.title("Análisis de Mercados de Metales")
