@@ -32,13 +32,27 @@ st.markdown(
         justify-content: center;
     }
     .dataframe-container .stDataFrame {
-        width: 90%;
+        width: 100%; /* Cambiar a 100% para ocupar todo el ancho */
     }
     .precio-container {
         text-align: center;
         font-size: 22px; /* Ajustar el tamaño de la fuente */
         font-weight: bold;
         color: darkblue; /* Cambiar el color a un azul más oscuro */
+    }
+    @media (max-width: 768px) {
+        .logo-container {
+            margin-bottom: 10px;
+        }
+        .title-text {
+            font-size: 24px; /* Reducir el tamaño de la fuente en dispositivos móviles */
+        }
+        .precio-container {
+            font-size: 18px; /* Ajustar el tamaño de la fuente para móviles */
+        }
+        .stButton button {
+            width: 100%; /* Asegura que los botones sean completamente visibles en móviles */
+        }
     }
     </style>
     """,
@@ -54,7 +68,12 @@ st.image(logo, width=400)  # Ajustar el ancho según sea necesario
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Título de la aplicación
-st.markdown('<h1 class="title-text">Análisis de Mercados de Metales</h1>', unsafe_allow_html=True)
+st.markdown(
+    """
+    <h1 style='text-align: center; color: darkgray; font-size: 28px;'>Análisis de Mercados de Metales</h1>
+    """,
+    unsafe_allow_html=True
+)
 
 # Descripción de la aplicación
 st.write("""
@@ -130,6 +149,21 @@ if st.button("Analizar"):
         plt.grid(True)
         st.pyplot(plt)
     
+        # Guardar el gráfico como imagen en USD
+        grafico_usd_filename = f'tendencia_precios_{metal.lower()}_usd.png'
+        plt.savefig(grafico_usd_filename)
+        
+        # Botón de descarga para gráfico en USD
+        with open(grafico_usd_filename, "rb") as file:
+            st.markdown('<div style="text-align: center;">', unsafe_allow_html=True)
+            st.download_button(
+                label="Descargar gráfico en USD",
+                data=file,
+                file_name=grafico_usd_filename,
+                mime="image/png"
+            )
+            st.markdown('</div>', unsafe_allow_html=True)
+        
         # Conversión a Pesos Mexicanos
         data['Close_MXN'] = data['Close'] * tipo_cambio
         
@@ -142,7 +176,17 @@ if st.button("Analizar"):
         plt.grid(True)
         st.pyplot(plt)
     
-        # Guardar el gráfico como imagen
-        grafico_filename = f'tendencia_precios_{metal.lower()}_mxn.png'
-        plt.savefig(grafico_filename)
-        st.write(f"Gráfico en MXN guardado como '{grafico_filename}'.")
+        # Guardar el gráfico como imagen en MXN
+        grafico_mxn_filename = f'tendencia_precios_{metal.lower()}_mxn.png'
+        plt.savefig(grafico_mxn_filename)
+        
+        # Botón de descarga para gráfico en MXN
+        with open(grafico_mxn_filename, "rb") as file:
+            st.markdown('<div style="text-align: center;">', unsafe_allow_html=True)
+            st.download_button(
+                label="Descargar gráfico en MXN",
+                data=file,
+                file_name=grafico_mxn_filename,
+                mime="image/png"
+            )
+            st.markdown('</div>', unsafe_allow_html=True)
