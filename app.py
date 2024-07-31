@@ -6,12 +6,11 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from datetime import datetime
 import yfinance as yf
-import base64
 
 # Configuración del tema en config.toml o por defecto
 st.set_page_config(page_title="Análisis de Mercados de Metales", layout="centered")
 
-# Inyectar CSS personalizado para fondo blanco, ajuste de logo y centrado de tabla
+# Inyectar CSS personalizado para fondo blanco, ajuste de logo, centrado de tabla y personalización del título
 st.markdown(
     """
     <style>
@@ -19,8 +18,14 @@ st.markdown(
         background-color: white;
     }
     .logo-container {
-        text-align: center;
+        display: flex;
+        justify-content: center;
         margin-bottom: 20px;
+    }
+    .title-text {
+        font-size: 32px; /* Cambia el tamaño de la fuente aquí */
+        color: #4d4d4d;  /* Cambia el color a gris oscuro */
+        text-align: center; /* Alinea el texto al centro */
     }
     .dataframe-container {
         display: flex;
@@ -40,16 +45,16 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Cargar el logo de la empresa en formato webp
-with open("logo.webp", "rb") as image_file:
-    logo_bytes = image_file.read()
-    logo_b64 = base64.b64encode(logo_bytes).decode("utf-8")
+# Cargar el logo de la empresa
+logo = Image.open("logo.webp")
 
 # Mostrar el logo centrado en la parte superior
-st.markdown(f'<div class="logo-container"><img src="data:image/webp;base64,{logo_b64}" width="300"></div>', unsafe_allow_html=True)
+st.markdown('<div class="logo-container">', unsafe_allow_html=True)
+st.image(logo, width=400)  # Ajustar el ancho según sea necesario
+st.markdown('</div>', unsafe_allow_html=True)
 
 # Título de la aplicación
-st.title("Análisis de Mercados de Metales")
+st.markdown('<h1 class="title-text">Análisis de Mercados de Metales</h1>', unsafe_allow_html=True)
 
 # Descripción de la aplicación
 st.write("""
