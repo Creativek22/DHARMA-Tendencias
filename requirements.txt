@@ -1,7 +1,7 @@
 streamlit
-requests
-beautifulsoup4
+yfinance
 pandas
 matplotlib
-pillow
-yfinance
+Pillow
+requests
+beautifulsoup4
