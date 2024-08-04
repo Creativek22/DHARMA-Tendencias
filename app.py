@@ -50,15 +50,15 @@ precio_niquel_mxn = precio_niquel_usd * tipo_cambio
 # Crear dos columnas para los valores del níquel
 col1, col2 = st.columns(2)
 
-# Mostrar los precios en USD y MXN, centrados y en negrita, rodeados por un recuadro
+# Mostrar los precios en USD y MXN, centrados y en negrita
 col1.markdown(f"""
-    <div style="border: 2px solid #4d4d4d; padding: 10px; text-align: center; border-radius: 10px;">
+    <div style="text-align: center;">
         <span style="font-size: 22px; font-weight: bold; color: green;">{precio_niquel_usd:,.2f} USD/MT</span>
     </div>
     """, unsafe_allow_html=True)
 
 col2.markdown(f"""
-    <div style="border: 2px solid #4d4d4d; padding: 10px; text-align: center; border-radius: 10px;">
+    <div style="text-align: center;">
         <span style="font-size: 22px; font-weight: bold; color: green;">{precio_niquel_mxn:,.2f} MXN/MT</span>
     </div>
     """, unsafe_allow_html=True)
