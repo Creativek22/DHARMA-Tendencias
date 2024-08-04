@@ -1,88 +1,37 @@
 import streamlit as st
-import requests
-from bs4 import BeautifulSoup
+import yfinance as yf
 import pandas as pd
 import matplotlib.pyplot as plt
-from PIL import Image
 from datetime import datetime
-import yfinance as yf
+import base64
+import os
+import requests
+from bs4 import BeautifulSoup
 
-# Configuración del tema en config.toml o por defecto
-st.set_page_config(page_title="Análisis de Mercados de Metales", layout="centered")
+# Configuración del tema de Streamlit
+st.set_page_config(page_title="Análisis de Mercados de Metales", layout="centered", initial_sidebar_state="collapsed")
 
-# Inyectar CSS personalizado para fondo blanco, ajuste de logo, centrado de tabla y personalización del título
-st.markdown(
-    """
-    <style>
-    .main {
-        background-color: white;
-    }
-    .logo-container {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 20px;
-    }
-    .title-text {
-        font-size: 32px; /* Cambia el tamaño de la fuente aquí */
-        color: #4d4d4d;  /* Cambia el color a gris oscuro */
-        text-align: center; /* Alinea el texto al centro */
-    }
-    .dataframe-container {
-        display: flex;
-        justify-content: center;
-    }
-    .dataframe-container .stDataFrame {
-        width: 100%; /* Cambiar a 100% para ocupar todo el ancho */
-    }
-    .precio-container {
-        text-align: center;
-        font-size: 22px; /* Ajustar el tamaño de la fuente */
-        font-weight: bold;
-        color: darkblue; /* Cambiar el color a un azul más oscuro */
-    }
-    @media (max-width: 768px) {
-        .logo-container {
-            margin-bottom: 10px;
-        }
-        .title-text {
-            font-size: 24px; /* Reducir el tamaño de la fuente en dispositivos móviles */
-        }
-        .precio-container {
-            font-size: 18px; /* Ajustar el tamaño de la fuente para móviles */
-        }
-        .stButton button {
-            width: 100%; /* Asegura que los botones sean completamente visibles en móviles */
-        }
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+# Mostrar el logo de la empresa centrado y con el tamaño original
+logo_path = 'logo/logo.webp'
+try:
+    with open(logo_path, "rb") as image_file:
+        logo_bytes = image_file.read()
+    logo_base64 = base64.b64encode(logo_bytes).decode("utf-8")
 
-# Cargar el logo de la empresa
-logo = Image.open("logo.webp")
-
-# Mostrar el logo centrado en la parte superior
-st.markdown('<div class="logo-container">', unsafe_allow_html=True)
-st.image(logo, width=400)  # Ajustar el ancho según sea necesario
-st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown(f"""
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <img src="data:image/webp;base64,{logo_base64}">
+        </div>
+    """, unsafe_allow_html=True)
+except FileNotFoundError:
+    st.error("No se encontró el logo en la ruta especificada.")
 
 # Título de la aplicación
-st.markdown(
-    """
-    <h1 style='text-align: center; color: darkgray; font-size: 28px;'>Análisis de Mercados de Metales</h1>
-    """,
-    unsafe_allow_html=True
-)
-
-# Descripción de la aplicación
-st.write("""
-Asistente de IA para el análisis de tendencias de mercado en materias primas.
-""")
+st.markdown("# Análisis de Mercados de Metales")
 
 # Monitoreo del precio del níquel en tiempo real desde Markets Insider
 st.write("Monitoreando el precio del níquel en tiempo real...")
-url = 'https://markets.businessinsider.com/commodities/nickel-price'
+url_nickel = 'https://markets.businessinsider.com/commodities/nickel-price'
 
 def get_nickel_price(url):
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
@@ -94,52 +43,71 @@ def get_nickel_price(url):
     except Exception as e:
         return f"Error: {e}"
 
-precio_niquel_usd = get_nickel_price(url)
+precio_niquel_usd = get_nickel_price(url_nickel)
 tipo_cambio = 18.5  # Ajusta según el tipo de cambio actual
 precio_niquel_mxn = precio_niquel_usd * tipo_cambio
 
-# Mostrar los precios en USD y MXN, centrados y en negrita
-st.markdown(f'<div class="precio-container">{precio_niquel_usd:.2f} USD/MT<br>{precio_niquel_mxn:.2f} MXN/MT</div>', unsafe_allow_html=True)
+# Crear dos columnas para los valores del níquel
+col1, col2 = st.columns(2)
+
+# Mostrar los precios en USD y MXN, centrados y en negrita, rodeados por un recuadro
+col1.markdown(f"""
+    <div style="border: 2px solid #4d4d4d; padding: 10px; text-align: center; border-radius: 10px;">
+        <span style="font-size: 22px; font-weight: bold; color: green;">{precio_niquel_usd:,.2f} USD/MT</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+col2.markdown(f"""
+    <div style="border: 2px solid #4d4d4d; padding: 10px; text-align: center; border-radius: 10px;">
+        <span style="font-size: 22px; font-weight: bold; color: green;">{precio_niquel_mxn:,.2f} MXN/MT</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Resto de la interfaz de usuario
+st.write("### Análisis de otros metales")
 
 # Selección de metal
-metal = st.selectbox("Selecciona el metal", ["Petróleo", "Aluminio", "Cobre", "Níquel"])
+metal = st.selectbox("Selecciona el metal", ["Oro", "Plata", "Cobre"])
 
-# Selección de rango de fechas y horas
-fecha_inicio = st.date_input("Fecha de inicio", pd.to_datetime("2021-01-01"))
-hora_inicio = st.time_input("Hora de inicio", datetime.strptime("00:00", "%H:%M").time())
-fecha_fin = st.date_input("Fecha de fin", pd.to_datetime("2023-01-01"))
-hora_fin = st.time_input("Hora de fin", datetime.strptime("23:59", "%H:%M").time())
+# Crear dos columnas para fecha y hora de inicio y fin
+col1, col2 = st.columns(2)
+
+with col1:
+    fecha_inicio = st.date_input("Fecha de inicio", pd.to_datetime("2021-01-01"))
+    hora_inicio = st.time_input("Hora de inicio", datetime.strptime("00:00", "%H:%M").time())
+
+with col2:
+    fecha_fin = st.date_input("Fecha de fin", pd.to_datetime("2023-01-01"))
+    hora_fin = st.time_input("Hora de fin", datetime.strptime("23:59", "%H:%M").time())
 
 # Combinar fecha y hora para las consultas
 fecha_inicio = datetime.combine(fecha_inicio, hora_inicio)
 fecha_fin = datetime.combine(fecha_fin, hora_fin)
 
+# Mapeo de metales a sus símbolos en Yahoo Finance
+simbolos = {
+    "Oro": "GC=F",
+    "Plata": "SI=F",
+    "Cobre": "HG=F"
+}
+
 # Botón para realizar el análisis
 if st.button("Analizar"):
-    # Convertir las selecciones a símbolos de Yahoo Finance
-    simbolos = {"Petróleo": "CL=F", "Aluminio": "ALI=F", "Cobre": "HG=F", "Níquel": "NI=F"}
     simbolo = simbolos[metal]
+    tipo_cambio = 18.5  # Ajusta según el tipo de cambio actual
 
-    # Descargar los datos
     st.write(f"Descargando datos para {metal} desde {fecha_inicio} hasta {fecha_fin}...")
     data = yf.download(simbolo, start=fecha_inicio, end=fecha_fin)
     
-    # Verificar si se descargaron datos
     if data.empty:
         st.write("No se encontraron datos para las fechas seleccionadas.")
     else:
-        # Calcular cambio porcentual diario
         data['% Change'] = data['Close'].pct_change() * 100
-        
-        # Guardar los datos en un archivo CSV
         data.to_csv(f'datos_{metal.lower()}.csv', encoding='utf-8', index=True)
         st.write(f"Datos guardados en 'datos_{metal.lower()}.csv'.")
-    
-        # Mostrar los datos centrados
-        st.markdown('<div class="dataframe-container">', unsafe_allow_html=True)
+
         st.dataframe(data)
-        st.markdown('</div>', unsafe_allow_html=True)
-    
+
         # Mostrar el gráfico en USD
         plt.figure(figsize=(10, 5))
         plt.plot(data.index, data['Close'], label=f"Precio de cierre de {metal} en USD")
@@ -155,14 +123,7 @@ if st.button("Analizar"):
         
         # Botón de descarga para gráfico en USD
         with open(grafico_usd_filename, "rb") as file:
-            st.markdown('<div style="text-align: center;">', unsafe_allow_html=True)
-            st.download_button(
-                label="Descargar gráfico en USD",
-                data=file,
-                file_name=grafico_usd_filename,
-                mime="image/png"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.download_button(label="Descargar gráfico en USD", data=file, file_name=grafico_usd_filename, mime="image/png")
         
         # Conversión a Pesos Mexicanos
         data['Close_MXN'] = data['Close'] * tipo_cambio
@@ -182,11 +143,4 @@ if st.button("Analizar"):
         
         # Botón de descarga para gráfico en MXN
         with open(grafico_mxn_filename, "rb") as file:
-            st.markdown('<div style="text-align: center;">', unsafe_allow_html=True)
-            st.download_button(
-                label="Descargar gráfico en MXN",
-                data=file,
-                file_name=grafico_mxn_filename,
-                mime="image/png"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.download_button(label="Descargar gráfico en MXN", data=file, file_name=grafico_mxn_filename, mime="image/png")
