@@ -74,12 +74,12 @@ metal = st.selectbox("Selecciona el metal", ["Oro", "Plata", "Cobre"])
 col1, col2 = st.columns(2)
 
 with col1:
-    fecha_inicio = st.date_input("Fecha de inicio", pd.to_datetime("2021-01-01"))
-    hora_inicio = st.time_input("Hora de inicio", datetime.strptime("00:00", "%H:%M").time())
+    fecha_inicio = st.date_input("Fecha de inicio", pd.to_datetime("2022-11-22"))
+    hora_inicio = st.time_input("Hora de inicio", datetime.strptime("11:00", "%H:%M").time())
 
 with col2:
-    fecha_fin = st.date_input("Fecha de fin", pd.to_datetime("2023-01-01"))
-    hora_fin = st.time_input("Hora de fin", datetime.strptime("23:59", "%H:%M").time())
+    fecha_fin = st.date_input("Fecha de fin", pd.to_datetime("2024-07-31"))
+    hora_fin = st.time_input("Hora de fin", datetime.strptime("23:00", "%H:%M").time())
 
 # Combinar fecha y hora para las consultas
 fecha_inicio = datetime.combine(fecha_inicio, hora_inicio)
