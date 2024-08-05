@@ -98,7 +98,7 @@ if st.button("Analizar"):
     tipo_cambio = 18.5  # Ajusta según el tipo de cambio actual
 
     st.write(f"Descargando datos para {metal} desde {fecha_inicio} hasta {fecha_fin}...")
-    data = yf.download(simbolo, start=fecha_inicio, end=fecha_fin)
+    data = yf.download(simbolo, start=fecha_inicio, end=fecha_fin, progress=False)
     
     if data.empty:
         st.write("No se encontraron datos para las fechas seleccionadas.")
