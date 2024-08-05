@@ -7,6 +7,7 @@ import base64
 import os
 import requests
 from bs4 import BeautifulSoup
+from io import BytesIO
 
 # Configuración del tema de Streamlit
 st.set_page_config(page_title="Análisis de Mercados de Metales", layout="centered", initial_sidebar_state="collapsed")
@@ -103,8 +104,10 @@ if st.button("Analizar"):
         st.write("No se encontraron datos para las fechas seleccionadas.")
     else:
         data['% Change'] = data['Close'].pct_change() * 100
-        data.to_csv(f'datos_{metal.lower()}.csv', encoding='utf-8', index=True)
-        st.write(f"Datos guardados en 'datos_{metal.lower()}.csv'.")
+
+        # Convertir los datos a CSV en memoria
+        csv_data = data.to_csv().encode('utf-8')
+        st.download_button(label="Descargar datos como CSV", data=csv_data, file_name=f'datos_{metal.lower()}.csv', mime='text/csv')
 
         st.dataframe(data)
 
@@ -116,14 +119,12 @@ if st.button("Analizar"):
         plt.ylabel('Precio de Cierre (USD)')
         plt.grid(True)
         st.pyplot(plt)
-    
-        # Guardar el gráfico como imagen en USD
-        grafico_usd_filename = f'tendencia_precios_{metal.lower()}_usd.png'
-        plt.savefig(grafico_usd_filename)
         
-        # Botón de descarga para gráfico en USD
-        with open(grafico_usd_filename, "rb") as file:
-            st.download_button(label="Descargar gráfico en USD", data=file, file_name=grafico_usd_filename, mime="image/png")
+        # Convertir el gráfico a imagen en memoria
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        st.download_button(label="Descargar gráfico en USD", data=buffer, file_name=f'tendencia_precios_{metal.lower()}_usd.png', mime='image/png')
         
         # Conversión a Pesos Mexicanos
         data['Close_MXN'] = data['Close'] * tipo_cambio
@@ -136,11 +137,9 @@ if st.button("Analizar"):
         plt.ylabel('Precio de Cierre (MXN)')
         plt.grid(True)
         st.pyplot(plt)
-    
-        # Guardar el gráfico como imagen en MXN
-        grafico_mxn_filename = f'tendencia_precios_{metal.lower()}_mxn.png'
-        plt.savefig(grafico_mxn_filename)
         
-        # Botón de descarga para gráfico en MXN
-        with open(grafico_mxn_filename, "rb") as file:
-            st.download_button(label="Descargar gráfico en MXN", data=file, file_name=grafico_mxn_filename, mime="image/png")
+        # Convertir el gráfico a imagen en memoria
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        st.download_button(label="Descargar gráfico en MXN", data=buffer, file_name=f'tendencia_precios_{metal.lower()}_mxn.png', mime='image/png')
